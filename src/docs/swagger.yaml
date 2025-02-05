@@ -1,0 +1,246 @@
+openapi: 3.0.0
+info:
+  title: API College Managment System
+  version: 1.0.0
+  description: API College Managment System
+
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 6
+        role:
+          type: string
+          enum: [admin, teacher, student, parent]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - username
+        - email
+        - password
+
+    LoginCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    StudentUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+
+paths:
+  /auth/signup:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+        "400":
+          description: Invalid input
+
+  /auth/login:
+    post:
+      summary: Login user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginCredentials"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+        "401":
+          description: Invalid credentials
+
+  /users/students:
+    get:
+      summary: Get all students
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Authentication required
+        "403":
+          description: Access denied
+        "500":
+          description: Server error
+    /students:
+    get:
+      summary: Get all students
+      tags:
+        - Students
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of all students
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+
+  /students/{id}:
+    get:
+      summary: Get student by ID
+      tags:
+        - Students
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student details
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+        '404':
+          description: Student not found
+
+    patch:
+      summary: Update student
+      tags:
+        - Students
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentUpdate'
+      responses:
+        '200':
+          description: Student updated successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+        '404':
+          description: Student not found
+
+    delete:
+      summary: Delete student
+      tags:
+        - Students
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student deleted successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+        '404':
+          description: Student not found
