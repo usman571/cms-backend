@@ -134,6 +134,20 @@ paths:
                         type: string
         "401":
           description: Invalid credentials
+  /auth/who-am-i:
+    get:
+      summary: Get current user info
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user information
+        '401':
+          description: Authentication required
+        '404':
+          description: User not found
 
   /users/students:
     get:

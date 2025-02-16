@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const environment = require('../config/environment');
 
 const generateToken = (userId) => {
-   return jwt.sign({ id: userId }, environment.jwtSecret, {
+   return jwt.sign({ _id: userId }, environment.jwtSecret, {
       expiresIn: environment.jwtExpiry,
    });
 };
