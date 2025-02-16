@@ -1,6 +1,5 @@
 const User = require('../models/User');
-const { generateToken } = require('../utils/jwt');
-
+const { generateToken, verifyToken } = require('../utils/jwt');
 const signup = async (req, res) => {
    try {
       const { username, email, password, role } = req.body;
@@ -19,7 +18,7 @@ const signup = async (req, res) => {
          message: 'User created successfully',
          token,
          user: {
-            id: user._id,
+            _id: user._id,
             username: user.username,
             email: user.email,
             role: user.role,
@@ -46,18 +45,56 @@ const login = async (req, res) => {
 
       const token = generateToken(user._id);
       res.json({
+         status: true,
          message: 'Login successful',
-         token,
-         user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-         },
+         data: {
+            accessToken: token,
+         }
       });
    } catch (error) {
       res.status(500).json({ message: error.message });
    }
 };
 
-module.exports = { signup, login };
+
+
+
+const whoAmI = async (req, res) => {
+   try {
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (!token) {
+         return res.status(401).json({
+            status: false,
+            code: 'AUTH_0001',
+            message: 'No token provided'
+         });
+      }
+
+      const decoded = verifyToken(token);
+      const user = await User.findById(decoded._id).select('-password');
+
+      if (!user) {
+         return res.status(404).json({
+            status: false,
+            code: 'AUTH_0002',
+            message: 'Error validating user token'
+         });
+      }
+      res.json({
+         status: true,
+         data: {
+            _id: user._id,
+            email: user.email,
+            username: user.username,
+            role: user.role
+         }
+      });
+   } catch (error) {
+      res.status(401).json({
+         status: false,
+         code: 'AUTH_0002',
+         message: 'Error validating user token'
+      });
+   }
+};
+module.exports = { signup, login, whoAmI };

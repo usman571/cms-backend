@@ -8,7 +8,7 @@ const auth = async (req, res, next) => {
       }
 
       const decoded = verifyToken(token);
-      req.userId = decoded.id;
+      req.userId = decoded._id;
       next();
    } catch (error) {
       res.status(401).json({ message: 'Invalid token' });
